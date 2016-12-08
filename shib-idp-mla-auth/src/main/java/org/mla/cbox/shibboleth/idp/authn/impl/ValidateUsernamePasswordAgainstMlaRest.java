@@ -87,11 +87,18 @@ public class ValidateUsernamePasswordAgainstMlaRest extends AbstractUsernamePass
     
     /** Represents a data object child of the member object */
     public static class MLAMemberObjectData extends GenericJson {
+        @Key
+        private String id;
+        
         @Key 
         private MLAMemberObjectDataAuthentication authentication;
         
         public MLAMemberObjectDataAuthentication getAuthentication() {
         	return this.authentication;
+        }
+        
+        public String getId() {
+        	return this.id;
         }
     }
     
@@ -182,11 +189,13 @@ public class ValidateUsernamePasswordAgainstMlaRest extends AbstractUsernamePass
                 return;
             }
             
-            // Parse out the username, password hash, and membership status.
+            // Parse out the id, username, password hash, and membership status.
+            String memberId = data.get(0).getId();
         	String username = data.get(0).getAuthentication().getUsername();
             String passwordHash = data.get(0).getAuthentication().getPassword();
             String membershipStatus = data.get(0).getAuthentication().getMembership_status();
             
+            log.debug("{} MLA returned member Id {}", getLogPrefix(), memberId);
             log.debug("{} MLA returned username {}", getLogPrefix(), username);
             log.debug("{} MLA returned password hash {}", getLogPrefix(), passwordHash);
             log.debug("{} MLA returned membership status {}", getLogPrefix(), membershipStatus);
@@ -208,6 +217,11 @@ public class ValidateUsernamePasswordAgainstMlaRest extends AbstractUsernamePass
             	handleError(profileRequestContext, authenticationContext, AuthnEventIds.INVALID_CREDENTIALS, AuthnEventIds.INVALID_CREDENTIALS);
                 return;
             }
+            
+            // Set the username in the context directly because the user may have typed the member number
+            // into the form rather than the username. The member number will work for authentication,
+            // but we always want to return the username as the principal.
+            getUsernamePasswordContext().setUsername(username);
             
             // Build the authentication result and proceed.
             log.info("{} Login by '{}' succeeded", getLogPrefix(), getUsernamePasswordContext().getUsername());
