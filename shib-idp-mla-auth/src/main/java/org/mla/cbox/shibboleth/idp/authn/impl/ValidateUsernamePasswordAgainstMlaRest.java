@@ -1,3 +1,16 @@
+/*
+* Copyright (C) 2017 Modern Language Association
+*
+* Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
+* except in compliance with the License. You may obtain a copy of the License at
+*
+* http://www.apache.org/licenses/LICENSE-2.0
+* 
+* Unless required by applicable law or agreed to in writing, software distributed under
+* the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+* KIND, either express or implied. See the License for the specific language governing
+* permissions and limitations under the License.
+*/
 package org.mla.cbox.shibboleth.idp.authn.impl;
 
 import java.io.IOException;
@@ -58,13 +71,13 @@ import net.shibboleth.idp.authn.context.UsernamePasswordContext;
 public class ValidateUsernamePasswordAgainstMlaRest extends AbstractUsernamePasswordValidationAction {
     
     /** MLA API key */
-	private String apiKey = null;
+    private String apiKey = null;
     
-	/** MLA API URL root */
-	private String apiRoot = null;
+    /** MLA API URL root */
+    private String apiRoot = null;
     
-	/** MLA API secret */
-	private String apiSecret = null;
+    /** MLA API secret */
+    private String apiSecret = null;
     
     /** HTTP transport used to query the MLA API endpoint */
     private static final HttpTransport HTTP_TRANSPORT = new NetHttpTransport();
@@ -81,7 +94,7 @@ public class ValidateUsernamePasswordAgainstMlaRest extends AbstractUsernamePass
         private List<MLAMemberObjectData> data;
         
         public List <MLAMemberObjectData> getData() {
-        	return this.data;
+            return this.data;
         }
     }
     
@@ -94,11 +107,11 @@ public class ValidateUsernamePasswordAgainstMlaRest extends AbstractUsernamePass
         private MLAMemberObjectDataAuthentication authentication;
         
         public MLAMemberObjectDataAuthentication getAuthentication() {
-        	return this.authentication;
+            return this.authentication;
         }
         
         public String getId() {
-        	return this.id;
+            return this.id;
         }
     }
     
@@ -114,15 +127,15 @@ public class ValidateUsernamePasswordAgainstMlaRest extends AbstractUsernamePass
         private String membership_status;
         
         public String getUsername() {
-        	return this.username;
+            return this.username;
         }
         
         public String getPassword() {
-        	return this.password;
+            return this.password;
         }
         
         public String getMembership_status() {
-        	return this.membership_status;
+            return this.membership_status;
         }
     }
 
@@ -137,22 +150,22 @@ public class ValidateUsernamePasswordAgainstMlaRest extends AbstractUsernamePass
             // Construct the URL composed of the API root, members method with id value equal
             //  to the username entered in the login form, the API key, and time stamp.
             StringBuilder urlBuilder = new StringBuilder().
-            		append(this.apiRoot).
-            		append("members/").
-            		append(getUsernamePasswordContext().getUsername()).
-            		append("?").
-            		append("key=").
-            		append(this.apiKey).
-            		append("&timestamp=").
-            		append(String.valueOf(Instant.now().getEpochSecond()));
+                    append(this.apiRoot).
+                    append("members/").
+                    append(getUsernamePasswordContext().getUsername()).
+                    append("?").
+                    append("key=").
+                    append(this.apiKey).
+                    append("&timestamp=").
+                    append(String.valueOf(Instant.now().getEpochSecond()));
             
             // The signature is created by prepending the GET method with a '&' separator to the
             //  URL and then computing the SHA256 HMAC hash using the key.
             //
             StringBuilder baseStringBuilder = new StringBuilder().
-            		append("GET").
-            		append("&").
-            		append(UriUtils.encode(urlBuilder.toString(), "UTF-8"));
+                    append("GET").
+                    append("&").
+                    append(UriUtils.encode(urlBuilder.toString(), "UTF-8"));
             
             Mac sha256_HMAC = Mac.getInstance("HmacSHA256");
             SecretKeySpec secretKey = new SecretKeySpec(this.apiSecret.getBytes("UTF-8"), "HmacSHA256");
@@ -165,33 +178,33 @@ public class ValidateUsernamePasswordAgainstMlaRest extends AbstractUsernamePass
             log.debug("{} MLA query URL is {}", getLogPrefix(), urlBuilder.toString());
             
             // Query the MLA API
-        	 HttpRequestFactory requestFactory = HTTP_TRANSPORT.createRequestFactory(
-             		new HttpRequestInitializer() {
+             HttpRequestFactory requestFactory = HTTP_TRANSPORT.createRequestFactory(
+                    new HttpRequestInitializer() {
                          @Override
                          public void initialize(HttpRequest request) {
                              /* Set default parser as a JSON parser to make casting to class instance easier */
-                         	request.setParser(new JsonObjectParser(JSON_FACTORY));
+                            request.setParser(new JsonObjectParser(JSON_FACTORY));
                          }
-             		});
-        	HttpRequest request = requestFactory.buildGetRequest(new GenericUrl(urlBuilder.toString()));
-        	HttpResponse response = request.execute();
+                    });
+            HttpRequest request = requestFactory.buildGetRequest(new GenericUrl(urlBuilder.toString()));
+            HttpResponse response = request.execute();
             
             // Parse the response and create an instance of the MLAMemberObject.
-        	MLAMemberObject mlaMembership = response.parseAs(MLAMemberObject.class);
+            MLAMemberObject mlaMembership = response.parseAs(MLAMemberObject.class);
             
             List<MLAMemberObjectData> data =  mlaMembership.getData();
             
             // The data element, if present, is a list. If not present then the size of the list
             // is zero and this indicates that the username could not be found.
             if (data.size() < 1) {
-            	log.info("{} User {} is not known to MLA", getLogPrefix(), getUsernamePasswordContext().getUsername());
-            	handleError(profileRequestContext, authenticationContext, AuthnEventIds.NO_CREDENTIALS, AuthnEventIds.NO_CREDENTIALS);
+                log.info("{} User {} is not known to MLA", getLogPrefix(), getUsernamePasswordContext().getUsername());
+                handleError(profileRequestContext, authenticationContext, AuthnEventIds.NO_CREDENTIALS, AuthnEventIds.NO_CREDENTIALS);
                 return;
             }
             
             // Parse out the id, username, password hash, and membership status.
             String memberId = data.get(0).getId();
-        	String username = data.get(0).getAuthentication().getUsername();
+            String username = data.get(0).getAuthentication().getUsername();
             String passwordHash = data.get(0).getAuthentication().getPassword();
             String membershipStatus = data.get(0).getAuthentication().getMembership_status();
             
@@ -202,8 +215,8 @@ public class ValidateUsernamePasswordAgainstMlaRest extends AbstractUsernamePass
             
             // Non-active members cannot authenticate.
             if (!new String("active").equals(membershipStatus)) {
-            	log.info("{} User {} does not have active status", getLogPrefix(), getUsernamePasswordContext().getUsername());
-            	handleError(profileRequestContext, authenticationContext, AuthnEventIds.NO_CREDENTIALS, AuthnEventIds.NO_CREDENTIALS);
+                log.info("{} User {} does not have active status", getLogPrefix(), getUsernamePasswordContext().getUsername());
+                handleError(profileRequestContext, authenticationContext, AuthnEventIds.NO_CREDENTIALS, AuthnEventIds.NO_CREDENTIALS);
                 return;
             }
             
@@ -213,8 +226,8 @@ public class ValidateUsernamePasswordAgainstMlaRest extends AbstractUsernamePass
             
             // Compare the input username with the password hash returned by the MLA API.
             if(!pw_hash.equals(passwordHash)) {
-            	log.info("{} Invalid password", getLogPrefix(), getUsernamePasswordContext().getUsername());
-            	handleError(profileRequestContext, authenticationContext, AuthnEventIds.INVALID_CREDENTIALS, AuthnEventIds.INVALID_CREDENTIALS);
+                log.info("{} Invalid password", getLogPrefix(), getUsernamePasswordContext().getUsername());
+                handleError(profileRequestContext, authenticationContext, AuthnEventIds.INVALID_CREDENTIALS, AuthnEventIds.INVALID_CREDENTIALS);
                 return;
             }
             
@@ -241,7 +254,7 @@ public class ValidateUsernamePasswordAgainstMlaRest extends AbstractUsernamePass
      *  @param key key to set
      */
     public void setApiKey(@Nullable final String key) {
-    	this.apiKey = key;
+        this.apiKey = key;
     }
     
     /**
@@ -250,7 +263,7 @@ public class ValidateUsernamePasswordAgainstMlaRest extends AbstractUsernamePass
      *  @param url API url to set
      */
     public void setApiRoot(@Nullable final String url) {
-    	this.apiRoot = url;
+        this.apiRoot = url;
     }
     
     /**
@@ -259,6 +272,6 @@ public class ValidateUsernamePasswordAgainstMlaRest extends AbstractUsernamePass
      *  @param secret API secret to set
      */
     public void setApiSecret(@Nullable final String secret) {
-    	this.apiSecret = secret;
+        this.apiSecret = secret;
     }
 }
