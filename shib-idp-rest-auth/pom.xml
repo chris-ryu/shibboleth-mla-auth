@@ -16,15 +16,15 @@ permissions and limitations under the License.
 
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>org.mla.cbox</groupId>
+  <groupId>com.bitgaram.idp</groupId>
 
-  <artifactId>shib-idp-mla-auth</artifactId>
+  <artifactId>shib-idp-rest-auth</artifactId>
 
   <packaging>jar</packaging>
 
-  <version>1.0-SNAPSHOT</version>
+  <version>1.2</version>
 
-  <name>shib-idp-mla-auth</name>
+  <name>shib-idp-rest-auth</name>
 
   <repositories>
     <repository>
@@ -43,8 +43,8 @@ permissions and limitations under the License.
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.3</version>
         <configuration>
-          <source>1.7</source>
-          <target>1.7</target>
+          <source>1.8</source>
+          <target>1.8</target>
         </configuration>
       </plugin>
       <plugin>
@@ -84,13 +84,13 @@ permissions and limitations under the License.
     <dependency>
         <groupId>net.shibboleth.idp</groupId>
         <artifactId>idp-authn-api</artifactId>
-        <version>3.2.1</version>
+        <version>4.1.2</version>
         <scope>provided</scope>
     </dependency>
     <dependency>
         <groupId>net.shibboleth.idp</groupId>
         <artifactId>idp-attribute-resolver-api</artifactId>
-        <version>3.2.1</version>
+        <version>4.1.2</version>
         <scope>provided</scope>
     </dependency>
     <dependency>
