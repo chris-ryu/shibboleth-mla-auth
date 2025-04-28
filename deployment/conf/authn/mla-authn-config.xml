@@ -26,11 +26,11 @@ permissions and limitations under the License.
        default-destroy-method="destroy">
     
    <bean id="ValidateUsernamePasswordAgainstMlaRest" 
-       class="org.mla.cbox.shibboleth.idp.authn.impl.ValidateUsernamePasswordAgainstMlaRest" 
+       class="com.bitgaram.shibboleth.idp.authn.impl.ValidateUsernamePasswordAgainstRest" 
        scope="prototype"
-       p:apiKey="YOUR_API_KEY"
-       p:apiRoot="https://api.mla.org/1/"
-       p:apiSecret="YOUR_API_SECRET"
+       p:apiRoot="http://rest:4000/auth"
+       p:connectionTimeout="5"
+       p:retryAttempts="2"
        p:classifiedMessages-ref="shibboleth.authn.Password.ClassifiedMessageMap" />
 
     <alias name="ValidateUsernamePasswordAgainstMlaRest" alias="ValidateUsernamePassword"/>
