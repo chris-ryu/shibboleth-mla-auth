@@ -58,6 +58,8 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonArray;
 
+import net.shibboleth.idp.authn.principal.UsernamePrincipal;
+
 @ThreadSafeAfterInit
 public class ValidateUsernamePasswordAgainstRest extends AbstractUsernamePasswordCredentialValidator {
     
@@ -524,6 +526,12 @@ public class ValidateUsernamePasswordAgainstRest extends AbstractUsernamePasswor
      * @return the populated subject
      */
     protected Subject populateSubject(final Subject subject, final UsernamePasswordContext usernamePasswordContext) {
+        // 인증된 사용자 이름으로 UsernamePrincipal 생성하여 Subject에 추가
+        subject.getPrincipals().add(new UsernamePrincipal(usernamePasswordContext.getTransformedUsername()));
+        
+        // 필요에 따라 추가 Principal 객체 생성 가능
+        // subject.getPrincipals().add(new AuthenticationMethodPrincipal("RestAuthentication"));
+        
         return subject;
     }
 }
