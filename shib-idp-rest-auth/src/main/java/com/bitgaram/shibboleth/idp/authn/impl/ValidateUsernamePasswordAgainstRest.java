@@ -70,7 +70,7 @@ public class ValidateUsernamePasswordAgainstRest extends AbstractUsernamePasswor
     private String apiSecret = null;
     
     /** MLA API URL root - default to http://rest:4000/check but can be configured */
-    private String apiRoot = "http://rest:4000/auth";
+    private String apiRoot = "http://rest:4000/check";
     
     /** Connection timeout in seconds */
     private int connectionTimeout = 10;
@@ -163,7 +163,7 @@ public class ValidateUsernamePasswordAgainstRest extends AbstractUsernamePasswor
             
             HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(apiRoot))
-                .method("HEAD", HttpRequest.BodyPublishers.noBody())
+                .GET()  // Changed from .method("HEAD", HttpRequest.BodyPublishers.noBody())
                 .timeout(Duration.ofSeconds(connectionTimeout))
                 .build();
                 
@@ -194,8 +194,8 @@ public class ValidateUsernamePasswordAgainstRest extends AbstractUsernamePasswor
         this.log.debug("{} Attempting to authenticate user {}", getLogPrefix(), usernamePasswordContext.getUsername());
         String username = usernamePasswordContext.getTransformedUsername();
         String password = URLEncoder.encode(usernamePasswordContext.getPassword(), "UTF-8");
-        
-        String url = String.format("%s/%s/%s", apiRoot, username, password);
+        String authPath = "http://rest:4000/auth"; 
+        String url = String.format("%s/%s/%s", authPath, username, password);
         this.log.debug("{} MLA query URL is {}", getLogPrefix(), url);
         
         HttpRequest request = HttpRequest.newBuilder()
